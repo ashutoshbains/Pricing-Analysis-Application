@@ -1,0 +1,22 @@
+<html>
+    <meta charset="UTF-8">
+    <head>
+        {% if title %}
+        <title>{{ title }} - Sample App</title>
+        {% else %}
+        <title> ELSE IF DEFAULT TITLE </title>
+        {% endif %}
+        <script src="https://cdn.jsdelivr.net/npm/echarts@5"></script>
+    </head>
+    <body>
+        <h1>Welcome {{ content.user }} </h1>
+        {% for post in posts %}
+        <div><p><b>{{ post.author.username }}</b> : {{ post.body }}</p></div>
+        {% endfor %}
+        <!-- Container for the Pyecharts visualization -->
+        <div id="chart" style="width: 1500px; height: 600px;">
+        <!-- Embed Pyecharts visualization -->
+        {{ chart | safe }}
+        </div>
+    </body>
+</html>

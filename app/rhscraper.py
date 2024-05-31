@@ -1,5 +1,5 @@
 import time
-import config
+from app import config
 import requests
 import pandas as pd
 from bs4 import BeautifulSoup
@@ -13,13 +13,15 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import StaleElementReferenceException
 
-PRODUCT_SUBCATEGORIES = ['Planters']
+PRODUCT_SUBCATEGORIES = ['Planters','Door Mats']
 
 def get_url(subcategory):
     if subcategory == 'Tic Tac Toe':
         return 'https://ruralhandmade.com/search/tic-tac'
     elif subcategory == 'Planters':
         return 'https://ruralhandmade.com/product/garden-and-outdoors/planters-1'
+    elif subcategory == 'Door mats':
+        return 'https://ruralhandmade.com/product/rugs/door-mats-1'
     else:
         return f'https://ruralhandmade.com/search/{subcategory.lower().replace(" ", "-")}'
 

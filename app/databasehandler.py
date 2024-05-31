@@ -1,4 +1,4 @@
-import config
+from app import config
 import pyodbc
 from sqlalchemy import create_engine
 
@@ -40,6 +40,15 @@ class DbHandler:
         cursor = self.conn.cursor()
         cursor.execute('DELETE FROM fct_products')
         self.conn.commit()
+
+    def get_prices(self, store, subcategory):
+        prices = []
+        cursor = self.conn.cursor()
+        cursor.execute('SELECT price FROM fct_products WHERE store = ? AND subcategory = ?',store,subcategory)
+        query_out = cursor.fetchall()
+        for row in query_out:
+            prices.append(row.price)
+        return prices
 
     def get_product_count_by_subcategory(self,subcategory):
         cursor = self.conn.cursor()
