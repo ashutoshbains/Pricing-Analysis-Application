@@ -14,6 +14,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import StaleElementReferenceException
 
 PRODUCT_SUBCATEGORIES = ['Planters','Door Mats']
+STORE_NAME = 'Rural Handmade'
 
 def get_url(subcategory):
     if subcategory == 'Tic Tac Toe':
@@ -50,13 +51,15 @@ def scrape_data(subcategory):
             products = driver.find_elements(By.CLASS_NAME, 'jprodut-listing-details')
             # url_list.extend([product.find_element(By.TAG_NAME, 'a').get_attribute('href') for product in products])
             for product in products:
+                if n > 100:
+                    return output_df
                 name = product.find_element(By.TAG_NAME,'p').text
                 price = product.find_element(By.CLASS_NAME,'jpd-price').text.split(' - ')[0].split('\n')[1]
                 price = float(price.replace('$',''))
                 url = product.find_element(By.TAG_NAME, 'a').get_attribute('href')
                 output_df.loc[len(output_df)] = [url,
                                              name,
-                                             'Rural Handmade',
+                                             STORE_NAME,
                                              config.get_category(subcategory),
                                              subcategory,
                                              price,

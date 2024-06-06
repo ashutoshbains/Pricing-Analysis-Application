@@ -16,8 +16,9 @@ DB_COLUMNS = ['url',
 # Product related variables
 CATEGORY_DICT = {
     'Office': ('Journal'),
-    'Decor': ('Frames', 'Statues'),
-    'Garden': ('Planters')
+    'Decor': ('Frames','Statues','Door Mats'),
+    'Garden': ('Planters'),
+    'Accessories': ('Earrings')
 }
 
 def get_category(subcategory):

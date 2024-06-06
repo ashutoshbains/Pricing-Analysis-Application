@@ -1,8 +1,10 @@
-from app import config
 import pyodbc
-from sqlalchemy import create_engine
+import numpy as np
+from app import config
+from datetime import datetime
 
 class DbHandler:
+
     def __init__(self):
         self.server = config.SERVER_NAME
         self.database = config.DATABASE_NAME
@@ -15,6 +17,99 @@ class DbHandler:
                                         "Server="+self.server+';'
                                         "Database="+self.database+';')
             
+
+    def clear_database(self):
+        cursor = self.conn.cursor()
+        cursor.execute('DELETE FROM fct_price_history')
+        cursor.execute('DELETE FROM fct_products')
+        self.conn.commit()
+
+    def get_prices(self, store, subcategory):
+        prices = []
+        cursor = self.conn.cursor()
+        cursor.execute('SELECT price FROM fct_products WHERE store = ? AND subcategory = ?',store,subcategory)
+        query_out = cursor.fetchall()
+        for row in query_out:
+            prices.append(row.price)
+        return prices
+    
+    def change_price_if_updated(self, scraped_row):
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT price,timestamp from fct_price_history where url = ? ORDER BY timestamp DESC", scraped_row['url'].values[0])
+        query_out = cursor.fetchall()
+        if len(query_out) == 0:
+            dt_str = np.datetime_as_string(scraped_row['last_updated'].values[0])
+            last_updated = datetime.fromisoformat(dt_str)
+            cursor.execute('INSERT INTO fct_price_history VALUES ( ?, ?, ?)',
+                           scraped_row['url'].values[0],
+                           scraped_row['price'].values[0],
+                           last_updated)
+            self.conn.commit()
+        else:
+            last_updated_price = query_out[0].price
+            scraped_price =  scraped_row['price'].values[0]
+            if scraped_price != last_updated_price:
+                dt_str = np.datetime_as_string(scraped_row['last_updated'].values[0])
+                last_updated = datetime.fromisoformat(dt_str)
+                cursor.execute('INSERT INTO fct_price_history VALUES ( ?, ?, ?)',
+                           scraped_row['url'].values[0],
+                           scraped_price,
+                           last_updated)
+                self.conn.commit()
+                print('UPDATED PRICE FOR',scraped_row['url'].values[0]) 
+
+
+    def get_product_count_by_subcategory(self,subcategory):
+        cursor = self.conn.cursor()
+        cursor.execute('SELECT COUNT(id) FROM fct_products WHERE subcategory = ?',subcategory)
+        count = int(cursor.fetchone()[0])
+        print('Count in database ',count)
+        return count
+    
+
+    def find_deprecated_products(self, scraped_urls, store, subcategory):
+        cursor = self.conn.cursor()
+        db_urls_list = []
+
+        cursor.execute('SELECT url FROM fct_products WHERE store = ? AND subcategory = ?', store, subcategory)
+        query_out = cursor.fetchall()
+        for row in query_out:
+            db_urls_list.append(row.url)
+
+        deprecated_products = [element for element in db_urls_list if element not in scraped_urls.values]
+        return deprecated_products
+        
+    def remove_product_by_url(self,table,url):
+        cursor = self.conn.cursor()
+        cursor.execute( f"DELETE FROM {table} WHERE URL = '{url}'")
+        self.conn.commit()
+
+    def update_subcategory(self, scraped_df):
+        cursor = self.conn.cursor()
+
+        for index in range(0,len(scraped_df)):
+            cursor.execute('SELECT * from fct_products WHERE url = ?',scraped_df['url'].iloc[index])
+            query_out = cursor.fetchall()
+            if len(query_out) == 0:
+                cursor.execute('INSERT INTO fct_products VALUES (?, ?, ?, ?, ?, ?, ?)',
+                    scraped_df.iloc[index, 0],
+                    scraped_df.iloc[index, 1],
+                    scraped_df.iloc[index, 2],
+                    scraped_df.iloc[index, 3],
+                    scraped_df.iloc[index, 4],
+                    scraped_df.iloc[index, 5],
+                    scraped_df.iloc[index, 6])
+                self.conn.commit()
+            else:
+                cursor.execute('UPDATE fct_products SET price = ?, last_updated = ? WHERE url = ?',
+                               scraped_df.iloc[index, 5],
+                               scraped_df.iloc[index, 6],
+                               scraped_df.iloc[index, 0])
+                self.conn.commit()
+
+
+# --------------------------[DEPRECATED FUNCTIONS]------------------------------
+
     def add_to_database(self, data_frame):
         cursor = self.conn.cursor()
         # Get the last id in database
@@ -35,53 +130,3 @@ class DbHandler:
                    data_frame.iloc[row, 5])
             id += 1
             self.conn.commit()
-
-    def clear_database(self):
-        cursor = self.conn.cursor()
-        cursor.execute('DELETE FROM fct_products')
-        self.conn.commit()
-
-    def get_prices(self, store, subcategory):
-        prices = []
-        cursor = self.conn.cursor()
-        cursor.execute('SELECT price FROM fct_products WHERE store = ? AND subcategory = ?',store,subcategory)
-        query_out = cursor.fetchall()
-        for row in query_out:
-            prices.append(row.price)
-        return prices
-
-    def get_product_count_by_subcategory(self,subcategory):
-        cursor = self.conn.cursor()
-        cursor.execute('SELECT COUNT(id) FROM fct_products WHERE subcategory = ?',subcategory)
-        count = int(cursor.fetchone()[0])
-        print('Count in database ',count)
-        return count
-    
-    # Outer join to find products in fct_products absent in scrape_df
-    def find_deprecated_products(self, scraped_urls, store, subcategory):
-        cursor = self.conn.cursor()
-        db_urls_list = []
-
-        cursor.execute('SELECT url FROM fct_products WHERE store = ? AND subcategory = ?', store, subcategory)
-        query_out = cursor.fetchall()
-        for row in query_out:
-            db_urls_list.append(row.url)
-
-        deprecated_products = [element for element in db_urls_list if element not in scraped_urls]
-        return deprecated_products
-        
-    
-    def update_subcategory(self, store, subcategory, scraped_df):
-        engine = create_engine('mssql+pyodbc://@HP/CompetitorProductsDB?driver=SQL Server')
-        print(type(engine))
-        cursor = self.conn.cursor()
-
-        # Remove existing entries for the specified store subcategory
-        cursor.execute('DELETE FROM fct_products WHERE store = ? AND subcategory = ?',store,subcategory)
-        self.conn.commit()
-
-        # Write new scraped entries 
-        scraped_df.to_sql('fct_products', engine, if_exists='append', index=False)
-
-
-
