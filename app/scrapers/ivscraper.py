@@ -11,7 +11,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
 
-PRODUCT_SUBCATEGORIES = ['Frames']
+PRODUCT_SUBCATEGORIES = ['Frames','Statues','Journal']
+STORE_NAME = 'Indie Vibe'
 
 def get_url(subcategory):
     match subcategory:
@@ -52,11 +53,9 @@ def get_product_details(url):
     last_div = child_divs[-1]
 
 
-def scrape_data():
+def scrape_data(subcategory):
     for subcategory in PRODUCT_SUBCATEGORIES:
         product_urls = get_subcategory_urls(subcategory)
 
         for url in product_urls:
             details = get_product_details(url)
-
-scrape_data()

@@ -25,15 +25,29 @@ class DbHandler:
         self.conn.commit()
 
     def get_prices(self, store, subcategory):
-        prices = []
+        """Return a dictionary of product urls with their prices as value.
+
+        Args:
+            store (str): The store for which to fetch the prices
+            subcategory (str): The subcategory to fetch
+
+        Returns:
+            dict: Key: Product URL Value: Price
+        """
+        product_price_dict = {}
         cursor = self.conn.cursor()
-        cursor.execute('SELECT price FROM fct_products WHERE store = ? AND subcategory = ?',store,subcategory)
+        cursor.execute('SELECT url,price FROM fct_products WHERE store = ? AND subcategory = ?',store,subcategory)
         query_out = cursor.fetchall()
         for row in query_out:
-            prices.append(row.price)
-        return prices
+            product_price_dict[row.url] = row.price
+        return product_price_dict
     
     def change_price_if_updated(self, scraped_row):
+        """Compares the most recent stored prices in fct_price_history with scraped data and add new entry if price has changed.
+
+        Args:
+            scraped_row (dataframe): Single row from a scraped_df.
+        """
         cursor = self.conn.cursor()
         cursor.execute("SELECT price,timestamp from fct_price_history where url = ? ORDER BY timestamp DESC", scraped_row['url'].values[0])
         query_out = cursor.fetchall()
@@ -77,6 +91,7 @@ class DbHandler:
             db_urls_list.append(row.url)
 
         deprecated_products = [element for element in db_urls_list if element not in scraped_urls.values]
+        print(f'FOUND {len(deprecated_products)} DEPRECATED PRODUCTS')
         return deprecated_products
         
     def remove_product_by_url(self,table,url):

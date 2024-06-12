@@ -7,10 +7,12 @@
   <link rel="apple-touch-icon" sizes="76x76" href="/static/assets/img/apple-icon.png">
   <link rel="icon" type="image/png" href="/static/assets/img/favicon.png">
   <title>
-    Dashboard
+    Price Watch
   </title>
   <!--     Fonts and icons     -->
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700|Noto+Sans:300,400,500,600,700,800|PT+Mono:300,400,500,600,700" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700|Noto+Sans:300,400,500,600,700,800|PT+Mono:300,400,500,600,700"
+    rel="stylesheet" />
   <!-- Nucleo Icons -->
   <link href="/static/assets/css/nucleo-icons.css" rel="stylesheet" />
   <link href="/static/assets/css/nucleo-svg.css" rel="stylesheet" />
@@ -19,26 +21,84 @@
   <link href="/static/assets/css/nucleo-svg.css" rel="stylesheet" />
   <!-- CSS Files -->
   <link id="pagestyle" href="/static/assets/css/corporate-ui-dashboard.css?v=1.0.0" rel="stylesheet" />
+  <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var selectedSubcategory = document.getElementById("selected_subcategory");
+      var updateButton = document.getElementById("update_button");
+      var refreshButton = document.getElementById("refresh_button");
+
+      // Initially disable the buttons
+      updateButton.disabled = true;
+      refreshButton.disabled = true;
+
+      // Event listener for subcategory change
+      selectedSubcategory.addEventListener("change", function () {
+        if (this.value) {
+          updateButton.disabled = false;
+          refreshButton.disabled = false;
+        } else {
+          updateButton.disabled = true;
+          refreshButton.disabled = true;
+        }
+      });
+    });
+  </script>
+  <script>
+    $(document).ready(function () {
+      $('#selected_subcategory').change(function () {
+        var selectedSubcategory = $(this).val();
+        $.ajax({
+          type: 'POST',
+          url: '/get_stores',
+          contentType: 'application/json',
+          data: JSON.stringify({ 'subcategory': selectedSubcategory }),
+          success: function (response) {
+            var stores = response.stores;
+            var select = $('#store_select');
+            select.empty();
+            $.each(stores, function (index, value) {
+              select.append($('<option>').text(value));
+            });
+          }
+        });
+      });
+      $('#subcategory').trigger('change');
+    });
+  </script>
 </head>
 
 <body class="g-sidenav-show  bg-gray-100">
   <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 bg-slate-900 fixed-start " id="sidenav-main">
     <div class="sidenav-header">
-      <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
-      <span class="navbar-brand d-flex align-items-center mt-4 font-weight-bold" style="color:white; font-size:1.7rem">Price Watch</span>
+      <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none"
+        aria-hidden="true" id="iconSidenav"></i>
+      <span class="navbar-brand d-flex align-items-center mt-4 font-weight-bold"
+        style="color:white; font-size:1.7rem">Price Watch</span>
     </div>
     <div class="collapse navbar-collapse px-4  w-auto " id="sidenav-collapse-main">
       <ul class="navbar-nav">
         <li class="nav-item">
           <a class="nav-link  active" href="/pages/dashboard.html">
             <div class="icon icon-shape icon-sm px-0 text-center d-flex align-items-center justify-content-center">
-              <svg width="30px" height="30px" viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+              <svg width="30px" height="30px" viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink">
                 <title>dashboard</title>
                 <g id="dashboard" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
                   <g id="template" transform="translate(12.000000, 12.000000)" fill="#FFFFFF" fill-rule="nonzero">
-                    <path class="color-foreground" d="M0,1.71428571 C0,0.76752 0.76752,0 1.71428571,0 L22.2857143,0 C23.2325143,0 24,0.76752 24,1.71428571 L24,5.14285714 C24,6.08962286 23.2325143,6.85714286 22.2857143,6.85714286 L1.71428571,6.85714286 C0.76752,6.85714286 0,6.08962286 0,5.14285714 L0,1.71428571 Z" id="Path"></path>
-                    <path class="color-background" d="M0,12 C0,11.0532171 0.76752,10.2857143 1.71428571,10.2857143 L12,10.2857143 C12.9468,10.2857143 13.7142857,11.0532171 13.7142857,12 L13.7142857,22.2857143 C13.7142857,23.2325143 12.9468,24 12,24 L1.71428571,24 C0.76752,24 0,23.2325143 0,22.2857143 L0,12 Z" id="Path"></path>
-                    <path class="color-background" d="M18.8571429,10.2857143 C17.9103429,10.2857143 17.1428571,11.0532171 17.1428571,12 L17.1428571,22.2857143 C17.1428571,23.2325143 17.9103429,24 18.8571429,24 L22.2857143,24 C23.2325143,24 24,23.2325143 24,22.2857143 L24,12 C24,11.0532171 23.2325143,10.2857143 22.2857143,10.2857143 L18.8571429,10.2857143 Z" id="Path"></path>
+                    <path class="color-foreground"
+                      d="M0,1.71428571 C0,0.76752 0.76752,0 1.71428571,0 L22.2857143,0 C23.2325143,0 24,0.76752 24,1.71428571 L24,5.14285714 C24,6.08962286 23.2325143,6.85714286 22.2857143,6.85714286 L1.71428571,6.85714286 C0.76752,6.85714286 0,6.08962286 0,5.14285714 L0,1.71428571 Z"
+                      id="Path"></path>
+                    <path class="color-background"
+                      d="M0,12 C0,11.0532171 0.76752,10.2857143 1.71428571,10.2857143 L12,10.2857143 C12.9468,10.2857143 13.7142857,11.0532171 13.7142857,12 L13.7142857,22.2857143 C13.7142857,23.2325143 12.9468,24 12,24 L1.71428571,24 C0.76752,24 0,23.2325143 0,22.2857143 L0,12 Z"
+                      id="Path"></path>
+                    <path class="color-background"
+                      d="M18.8571429,10.2857143 C17.9103429,10.2857143 17.1428571,11.0532171 17.1428571,12 L17.1428571,22.2857143 C17.1428571,23.2325143 17.9103429,24 18.8571429,24 L22.2857143,24 C23.2325143,24 24,23.2325143 24,22.2857143 L24,12 C24,11.0532171 23.2325143,10.2857143 22.2857143,10.2857143 L18.8571429,10.2857143 Z"
+                      id="Path"></path>
                   </g>
                 </g>
               </svg>
@@ -49,14 +109,23 @@
         <li class="nav-item">
           <a class="nav-link  " href="/pages/tables.html">
             <div class="icon icon-shape icon-sm px-0 text-center d-flex align-items-center justify-content-center">
-              <svg width="30px" height="30px" viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+              <svg width="30px" height="30px" viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink">
                 <title>table</title>
                 <g id="table" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
                   <g id="view-grid" transform="translate(12.000000, 12.000000)" fill="#FFFFFF" fill-rule="nonzero">
-                    <path class="color-foreground" d="M3.42857143,0 C1.53502286,0 0,1.53502286 0,3.42857143 L0,6.85714286 C0,8.75069143 1.53502286,10.2857143 3.42857143,10.2857143 L6.85714286,10.2857143 C8.75069143,10.2857143 10.2857143,8.75069143 10.2857143,6.85714286 L10.2857143,3.42857143 C10.2857143,1.53502286 8.75069143,0 6.85714286,0 L3.42857143,0 Z" id="Path"></path>
-                    <path class="color-background" d="M3.42857143,13.7142857 C1.53502286,13.7142857 0,15.2492571 0,17.1428571 L0,20.5714286 C0,22.4650286 1.53502286,24 3.42857143,24 L6.85714286,24 C8.75069143,24 10.2857143,22.4650286 10.2857143,20.5714286 L10.2857143,17.1428571 C10.2857143,15.2492571 8.75069143,13.7142857 6.85714286,13.7142857 L3.42857143,13.7142857 Z" id="Path"></path>
-                    <path class="color-background" d="M13.7142857,3.42857143 C13.7142857,1.53502286 15.2492571,0 17.1428571,0 L20.5714286,0 C22.4650286,0 24,1.53502286 24,3.42857143 L24,6.85714286 C24,8.75069143 22.4650286,10.2857143 20.5714286,10.2857143 L17.1428571,10.2857143 C15.2492571,10.2857143 13.7142857,8.75069143 13.7142857,6.85714286 L13.7142857,3.42857143 Z" id="Path"></path>
-                    <path class="color-foreground" d="M13.7142857,17.1428571 C13.7142857,15.2492571 15.2492571,13.7142857 17.1428571,13.7142857 L20.5714286,13.7142857 C22.4650286,13.7142857 24,15.2492571 24,17.1428571 L24,20.5714286 C24,22.4650286 22.4650286,24 20.5714286,24 L17.1428571,24 C15.2492571,24 13.7142857,22.4650286 13.7142857,20.5714286 L13.7142857,17.1428571 Z" id="Path"></path>
+                    <path class="color-foreground"
+                      d="M3.42857143,0 C1.53502286,0 0,1.53502286 0,3.42857143 L0,6.85714286 C0,8.75069143 1.53502286,10.2857143 3.42857143,10.2857143 L6.85714286,10.2857143 C8.75069143,10.2857143 10.2857143,8.75069143 10.2857143,6.85714286 L10.2857143,3.42857143 C10.2857143,1.53502286 8.75069143,0 6.85714286,0 L3.42857143,0 Z"
+                      id="Path"></path>
+                    <path class="color-background"
+                      d="M3.42857143,13.7142857 C1.53502286,13.7142857 0,15.2492571 0,17.1428571 L0,20.5714286 C0,22.4650286 1.53502286,24 3.42857143,24 L6.85714286,24 C8.75069143,24 10.2857143,22.4650286 10.2857143,20.5714286 L10.2857143,17.1428571 C10.2857143,15.2492571 8.75069143,13.7142857 6.85714286,13.7142857 L3.42857143,13.7142857 Z"
+                      id="Path"></path>
+                    <path class="color-background"
+                      d="M13.7142857,3.42857143 C13.7142857,1.53502286 15.2492571,0 17.1428571,0 L20.5714286,0 C22.4650286,0 24,1.53502286 24,3.42857143 L24,6.85714286 C24,8.75069143 22.4650286,10.2857143 20.5714286,10.2857143 L17.1428571,10.2857143 C15.2492571,10.2857143 13.7142857,8.75069143 13.7142857,6.85714286 L13.7142857,3.42857143 Z"
+                      id="Path"></path>
+                    <path class="color-foreground"
+                      d="M13.7142857,17.1428571 C13.7142857,15.2492571 15.2492571,13.7142857 17.1428571,13.7142857 L20.5714286,13.7142857 C22.4650286,13.7142857 24,15.2492571 24,17.1428571 L24,20.5714286 C24,22.4650286 22.4650286,24 20.5714286,24 L17.1428571,24 C15.2492571,24 13.7142857,22.4650286 13.7142857,20.5714286 L13.7142857,17.1428571 Z"
+                      id="Path"></path>
                   </g>
                 </g>
               </svg>
@@ -67,12 +136,17 @@
         <li class="nav-item">
           <a class="nav-link  " href="/pages/wallet.html">
             <div class="icon icon-shape icon-sm px-0 text-center d-flex align-items-center justify-content-center">
-              <svg width="30px" height="30px" viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+              <svg width="30px" height="30px" viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink">
                 <title>wallet</title>
                 <g id="wallet" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
                   <g id="credit-card" transform="translate(12.000000, 15.000000)" fill="#FFFFFF">
-                    <path class="color-background" d="M3,0 C1.343145,0 0,1.343145 0,3 L0,4.5 L24,4.5 L24,3 C24,1.343145 22.6569,0 21,0 L3,0 Z" id="Path" fill-rule="nonzero"></path>
-                    <path class="color-foreground" d="M24,7.5 L0,7.5 L0,15 C0,16.6569 1.343145,18 3,18 L21,18 C22.6569,18 24,16.6569 24,15 L24,7.5 Z M3,13.5 C3,12.67155 3.67158,12 4.5,12 L6,12 C6.82842,12 7.5,12.67155 7.5,13.5 C7.5,14.32845 6.82842,15 6,15 L4.5,15 C3.67158,15 3,14.32845 3,13.5 Z M10.5,12 C9.67158,12 9,12.67155 9,13.5 C9,14.32845 9.67158,15 10.5,15 L12,15 C12.82845,15 13.5,14.32845 13.5,13.5 C13.5,12.67155 12.82845,12 12,12 L10.5,12 Z" id="Shape"></path>
+                    <path class="color-background"
+                      d="M3,0 C1.343145,0 0,1.343145 0,3 L0,4.5 L24,4.5 L24,3 C24,1.343145 22.6569,0 21,0 L3,0 Z"
+                      id="Path" fill-rule="nonzero"></path>
+                    <path class="color-foreground"
+                      d="M24,7.5 L0,7.5 L0,15 C0,16.6569 1.343145,18 3,18 L21,18 C22.6569,18 24,16.6569 24,15 L24,7.5 Z M3,13.5 C3,12.67155 3.67158,12 4.5,12 L6,12 C6.82842,12 7.5,12.67155 7.5,13.5 C7.5,14.32845 6.82842,15 6,15 L4.5,15 C3.67158,15 3,14.32845 3,13.5 Z M10.5,12 C9.67158,12 9,12.67155 9,13.5 C9,14.32845 9.67158,15 10.5,15 L12,15 C12.82845,15 13.5,14.32845 13.5,13.5 C13.5,12.67155 12.82845,12 12,12 L10.5,12 Z"
+                      id="Shape"></path>
                   </g>
                 </g>
               </svg>
@@ -83,13 +157,20 @@
         <li class="nav-item">
           <a class="nav-link  " href="/pages/rtl.html">
             <div class="icon icon-shape icon-sm px-0 text-center d-flex align-items-center justify-content-center">
-              <svg width="30px" height="30px" viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+              <svg width="30px" height="30px" viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink">
                 <title>rtl</title>
                 <g id="rtl" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
                   <g id="menu-alt-3" transform="translate(12.000000, 14.000000)" fill="#FFFFFF">
-                    <path class="color-foreground" d="M0,1.71428571 C0,0.76752 0.76752,0 1.71428571,0 L22.2857143,0 C23.2325143,0 24,0.76752 24,1.71428571 C24,2.66105143 23.2325143,3.42857143 22.2857143,3.42857143 L1.71428571,3.42857143 C0.76752,3.42857143 0,2.66105143 0,1.71428571 Z" id="Path"></path>
-                    <path class="color-background" d="M0,10.2857143 C0,9.33894857 0.76752,8.57142857 1.71428571,8.57142857 L22.2857143,8.57142857 C23.2325143,8.57142857 24,9.33894857 24,10.2857143 C24,11.2325143 23.2325143,12 22.2857143,12 L1.71428571,12 C0.76752,12 0,11.2325143 0,10.2857143 Z" id="Path"></path>
-                    <path class="color-background" d="M10.2857143,18.8571429 C10.2857143,17.9103429 11.0532343,17.1428571 12,17.1428571 L22.2857143,17.1428571 C23.2325143,17.1428571 24,17.9103429 24,18.8571429 C24,19.8039429 23.2325143,20.5714286 22.2857143,20.5714286 L12,20.5714286 C11.0532343,20.5714286 10.2857143,19.8039429 10.2857143,18.8571429 Z" id="Path"></path>
+                    <path class="color-foreground"
+                      d="M0,1.71428571 C0,0.76752 0.76752,0 1.71428571,0 L22.2857143,0 C23.2325143,0 24,0.76752 24,1.71428571 C24,2.66105143 23.2325143,3.42857143 22.2857143,3.42857143 L1.71428571,3.42857143 C0.76752,3.42857143 0,2.66105143 0,1.71428571 Z"
+                      id="Path"></path>
+                    <path class="color-background"
+                      d="M0,10.2857143 C0,9.33894857 0.76752,8.57142857 1.71428571,8.57142857 L22.2857143,8.57142857 C23.2325143,8.57142857 24,9.33894857 24,10.2857143 C24,11.2325143 23.2325143,12 22.2857143,12 L1.71428571,12 C0.76752,12 0,11.2325143 0,10.2857143 Z"
+                      id="Path"></path>
+                    <path class="color-background"
+                      d="M10.2857143,18.8571429 C10.2857143,17.9103429 11.0532343,17.1428571 12,17.1428571 L22.2857143,17.1428571 C23.2325143,17.1428571 24,17.9103429 24,18.8571429 C24,19.8039429 23.2325143,20.5714286 22.2857143,20.5714286 L12,20.5714286 C11.0532343,20.5714286 10.2857143,19.8039429 10.2857143,18.8571429 Z"
+                      id="Path"></path>
                   </g>
                 </g>
               </svg>
@@ -122,6 +203,26 @@
   </aside>
   <main class="main-content position-relative max-height-vh-100 mt-2 h-100 border-radius-lg ">
     <div class="container-fluid py-4 px-5">
+      <div class="row px-5">
+        <div class="col-sm-11">
+        </div>
+        <div class="col-sm-1">
+          <nav class="navbar navbar-main navbar-expand-lg mx-5 px-0 shadow-none rounded" id="navbarBlur"
+            navbar-scroll="true">
+            <ul class="navbar-nav">
+              <li class="nav-item d-xl-none ps-3 d-flex">
+                <a href="javascript:;" class="nav-link text-body p-0" id="iconNavbarSidenav">
+                  <div class="sidenav-toggler-inner">
+                    <i class="sidenav-toggler-line"></i>
+                    <i class="sidenav-toggler-line"></i>
+                    <i class="sidenav-toggler-line"></i>
+                  </div>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
       <div class="row">
         <div class="col-md-12">
           <div class="d-md-flex align-items-center mb-3 mx-2">
@@ -129,34 +230,59 @@
               <h3 class="font-weight-bold mb-0">Price Overview</h3>
               <p class="mb-0">Summary of competitor product prices</p>
             </div>
-            <button type="button" class="btn btn-sm btn-white btn-icon d-flex align-items-center mb-0 ms-md-auto mb-sm-0 mb-2 me-2">
-              <span class="btn-inner--text">Configure</span>
+            <button id="update_button" type="button"
+              class="btn btn-sm btn-white btn-icon d-flex align-items-center mb-0 ms-md-auto mb-sm-0 mb-2 me-2"
+              onclick="update_dashboard()">
+              <span class="btn-inner--text">Update Dashboard</span>
             </button>
-            <button type="button" class="btn btn-sm btn-dark btn-icon d-flex align-items-center mb-0">
+            <button id="refresh_button" type="button"
+              class="btn btn-sm btn-dark btn-icon d-flex align-items-center mb-0" onclick="refresh_subcategory()">
               <span class="btn-inner--icon">
-                <svg width="16" height="16" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="d-block me-2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                <svg width="16" height="16" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                  stroke-width="1.5" stroke="currentColor" class="d-block me-2">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
                 </svg>
               </span>
-              <span class="btn-inner--text">Sync</span>
+              <span class="btn-inner--text">Refresh Subcategory</span>
             </button>
           </div>
         </div>
       </div>
+      <form method="post" action="/select"></form>
+      <div class="row mt-4">
+        <div class="col-md-4">
+          <select id="selected_subcategory" class="form-select mb-3" aria-label="Select Option">
+            <option value="" selected disabled>Choose a subcategory -</option>
+            {% for subcategory in subcategories %}
+            <option value="{{ subcategory }}">{{ subcategory }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-4">
+          <select id="store_select" class="form-select mb-3" aria-label="Select Option">
+            <option value="" selected disabled>Choose a subcategory first</option>
+          </select>
+        </div>
+      </div>
+      </form>
       <div class="row">
-        <div class="col-xl-3 col-sm-6 mt-4 mb-xl-0">
+        <div class="col-xl-3 col-sm-6 mt-1 mb-xl-0">
           <div class="card border shadow-xs mb-4">
             <div class="card-body text-start p-3 w-100">
-              <div class="icon icon-shape icon-sm bg-dark text-white text-center border-radius-sm d-flex align-items-center justify-content-center mb-3">
+              <div
+                class="icon icon-shape icon-sm bg-dark text-white text-center border-radius-sm d-flex align-items-center justify-content-center mb-3">
                 <svg height="16" width="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M4.5 3.75a3 3 0 00-3 3v.75h21v-.75a3 3 0 00-3-3h-15z" />
-                  <path fill-rule="evenodd" d="M22.5 9.75h-21v7.5a3 3 0 003 3h15a3 3 0 003-3v-7.5zm-18 3.75a.75.75 0 01.75-.75h6a.75.75 0 010 1.5h-6a.75.75 0 01-.75-.75zm.75 2.25a.75.75 0 000 1.5h3a.75.75 0 000-1.5h-3z" clip-rule="evenodd" />
+                  <path fill-rule="evenodd"
+                    d="M22.5 9.75h-21v7.5a3 3 0 003 3h15a3 3 0 003-3v-7.5zm-18 3.75a.75.75 0 01.75-.75h6a.75.75 0 010 1.5h-6a.75.75 0 01-.75-.75zm.75 2.25a.75.75 0 000 1.5h3a.75.75 0 000-1.5h-3z"
+                    clip-rule="evenodd" />
                 </svg>
               </div>
               <div class="row">
                 <div class="col-12">
                   <div class="w-100">
-                    <p class="text-sm text-secondary mb-1">Revenue</p>
+                    <p class="text-sm text-secondary mb-1">Highest Price</p>
                     <h4 class="mb-2 font-weight-bold">$99,118.5</h4>
                     <div class="d-flex align-items-center">
                       <span class="text-sm text-success font-weight-bolder">
@@ -170,13 +296,17 @@
             </div>
           </div>
         </div>
-        <div class="col-xl-3 col-sm-6 mt-4 mb-xl-0">
+        <div class="col-xl-3 col-sm-6 mt-1 mb-xl-0">
           <div class="card border shadow-xs mb-4">
             <div class="card-body text-start p-3 w-100">
-              <div class="icon icon-shape icon-sm bg-dark text-white text-center border-radius-sm d-flex align-items-center justify-content-center mb-3">
+              <div
+                class="icon icon-shape icon-sm bg-dark text-white text-center border-radius-sm d-flex align-items-center justify-content-center mb-3">
                 <svg width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                  <path fill-rule="evenodd" d="M7.5 5.25a3 3 0 013-3h3a3 3 0 013 3v.205c.933.085 1.857.197 2.774.334 1.454.218 2.476 1.483 2.476 2.917v3.033c0 1.211-.734 2.352-1.936 2.752A24.726 24.726 0 0112 15.75c-2.73 0-5.357-.442-7.814-1.259-1.202-.4-1.936-1.541-1.936-2.752V8.706c0-1.434 1.022-2.7 2.476-2.917A48.814 48.814 0 017.5 5.455V5.25zm7.5 0v.09a49.488 49.488 0 00-6 0v-.09a1.5 1.5 0 011.5-1.5h3a1.5 1.5 0 011.5 1.5zm-3 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z" clip-rule="evenodd" />
-                  <path d="M3 18.4v-2.796a4.3 4.3 0 00.713.31A26.226 26.226 0 0012 17.25c2.892 0 5.68-.468 8.287-1.335.252-.084.49-.189.713-.311V18.4c0 1.452-1.047 2.728-2.523 2.923-2.12.282-4.282.427-6.477.427a49.19 49.19 0 01-6.477-.427C4.047 21.128 3 19.852 3 18.4z" />
+                  <path fill-rule="evenodd"
+                    d="M7.5 5.25a3 3 0 013-3h3a3 3 0 013 3v.205c.933.085 1.857.197 2.774.334 1.454.218 2.476 1.483 2.476 2.917v3.033c0 1.211-.734 2.352-1.936 2.752A24.726 24.726 0 0112 15.75c-2.73 0-5.357-.442-7.814-1.259-1.202-.4-1.936-1.541-1.936-2.752V8.706c0-1.434 1.022-2.7 2.476-2.917A48.814 48.814 0 017.5 5.455V5.25zm7.5 0v.09a49.488 49.488 0 00-6 0v-.09a1.5 1.5 0 011.5-1.5h3a1.5 1.5 0 011.5 1.5zm-3 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                    clip-rule="evenodd" />
+                  <path
+                    d="M3 18.4v-2.796a4.3 4.3 0 00.713.31A26.226 26.226 0 0012 17.25c2.892 0 5.68-.468 8.287-1.335.252-.084.49-.189.713-.311V18.4c0 1.452-1.047 2.728-2.523 2.923-2.12.282-4.282.427-6.477.427a49.19 49.19 0 01-6.477-.427C4.047 21.128 3 19.852 3 18.4z" />
                 </svg>
               </div>
               <div class="row">
@@ -196,12 +326,15 @@
             </div>
           </div>
         </div>
-        <div class="col-xl-3 col-sm-6 mt-4 mb-xl-0">
+        <div class="col-xl-3 col-sm-6 mt-1 mb-xl-0">
           <div class="card border shadow-xs mb-4">
             <div class="card-body text-start p-3 w-100">
-              <div class="icon icon-shape icon-sm bg-dark text-white text-center border-radius-sm d-flex align-items-center justify-content-center mb-3">
+              <div
+                class="icon icon-shape icon-sm bg-dark text-white text-center border-radius-sm d-flex align-items-center justify-content-center mb-3">
                 <svg width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                  <path fill-rule="evenodd" d="M3 6a3 3 0 013-3h12a3 3 0 013 3v12a3 3 0 01-3 3H6a3 3 0 01-3-3V6zm4.5 7.5a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0v-2.25a.75.75 0 01.75-.75zm3.75-1.5a.75.75 0 00-1.5 0v4.5a.75.75 0 001.5 0V12zm2.25-3a.75.75 0 01.75.75v6.75a.75.75 0 01-1.5 0V9.75A.75.75 0 0113.5 9zm3.75-1.5a.75.75 0 00-1.5 0v9a.75.75 0 001.5 0v-9z" clip-rule="evenodd" />
+                  <path fill-rule="evenodd"
+                    d="M3 6a3 3 0 013-3h12a3 3 0 013 3v12a3 3 0 01-3 3H6a3 3 0 01-3-3V6zm4.5 7.5a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0v-2.25a.75.75 0 01.75-.75zm3.75-1.5a.75.75 0 00-1.5 0v4.5a.75.75 0 001.5 0V12zm2.25-3a.75.75 0 01.75.75v6.75a.75.75 0 01-1.5 0V9.75A.75.75 0 0113.5 9zm3.75-1.5a.75.75 0 00-1.5 0v9a.75.75 0 001.5 0v-9z"
+                    clip-rule="evenodd" />
                 </svg>
               </div>
               <div class="row">
@@ -221,12 +354,15 @@
             </div>
           </div>
         </div>
-        <div class="col-xl-3 mt-4 col-sm-6">
+        <div class="col-xl-3 mt-1 col-sm-6">
           <div class="card border shadow-xs mb-4">
             <div class="card-body text-start p-3 w-100">
-              <div class="icon icon-shape icon-sm bg-dark text-white text-center border-radius-sm d-flex align-items-center justify-content-center mb-3">
+              <div
+                class="icon icon-shape icon-sm bg-dark text-white text-center border-radius-sm d-flex align-items-center justify-content-center mb-3">
                 <svg width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                  <path fill-rule="evenodd" d="M5.25 2.25a3 3 0 00-3 3v4.318a3 3 0 00.879 2.121l9.58 9.581c.92.92 2.39 1.186 3.548.428a18.849 18.849 0 005.441-5.44c.758-1.16.492-2.629-.428-3.548l-9.58-9.581a3 3 0 00-2.122-.879H5.25zM6.375 7.5a1.125 1.125 0 100-2.25 1.125 1.125 0 000 2.25z" clip-rule="evenodd" />
+                  <path fill-rule="evenodd"
+                    d="M5.25 2.25a3 3 0 00-3 3v4.318a3 3 0 00.879 2.121l9.58 9.581c.92.92 2.39 1.186 3.548.428a18.849 18.849 0 005.441-5.44c.758-1.16.492-2.629-.428-3.548l-9.58-9.581a3 3 0 00-2.122-.879H5.25zM6.375 7.5a1.125 1.125 0 100-2.25 1.125 1.125 0 000 2.25z"
+                    clip-rule="evenodd" />
                 </svg>
               </div>
               <div class="row">
@@ -247,22 +383,53 @@
           </div>
         </div>
       </div>
-      <div class="row my-4">
-        <div class="col-lg-4 col-md-6 mb-md-0 mb-4">
-          <div class="card shadow-xs border h-100">
-            {{ chart1 | safe }}
-          </div>
+      <div class="row mx-2">
+        <div class="card shadow-xs border col-sm-7">
+          <div id="chart1" style="width: 100%; height: 100%; padding: 8%;"></div>
         </div>
       </div>
-    </div>
   </main>
+  <script>
+    function refresh_subcategory() {
+      var selected_subcategory = document.getElementById("selected_subcategory").value;
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", "/refresh_subcategory", true);
+      xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+          console.log("Refreshing subcategory");
+        }
+      };
+      xhr.send(JSON.stringify({ subcategory: selected_subcategory }));
+    }
+  </script>
+  <script>
+    function update_dashboard() {
+      var selected_subcategory = document.getElementById("selected_subcategory").value;
+      var selected_store = document.getElementById("store_select").value;
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", "/update_dashboard", true);
+      xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+          console.log("Updating dashboard");
+        }
+      };
+      xhr.send(JSON.stringify({ subcategory: selected_subcategory }));
+    }
+  </script>
   <!--   Core JS Files   -->
+  <script>
+    var chart1Spec = {{ chart1| safe}};
+    vegaEmbed('#chart1', chart1Spec, { "fit": { "type": "container" } });
+  </script>
   <script src="/static/assets/js/core/popper.min.js"></script>
   <script src="/static/assets/js/core/bootstrap.min.js"></script>
   <script src="/static/assets/js/plugins/perfect-scrollbar.min.js"></script>
   <script src="/static/assets/js/plugins/smooth-scrollbar.min.js"></script>
   <script src="/static/assets/js/plugins/chartjs.min.js"></script>
   <script src="/static/assets/js/plugins/swiper-bundle.min.js" type="text/javascript"></script>
+
   <script>
     var win = navigator.platform.indexOf('Win') > -1;
     if (win && document.querySelector('#sidenav-scrollbar')) {
@@ -272,6 +439,36 @@
       Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
     }
   </script>
+  <script>
+    window.addEventListener('resize', function () {
+      if (window.outerWidth < 800) {
+        window.resizeTo(800, window.outerHeight);
+      }
+    });
+  </script>
+  <script>
+    async function getRequest(url = '') {
+      const response = await fetch(url, {
+        method: 'GET',
+        cache: 'no-cache'
+      })
+      return response.json()
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+      let url = document.location
+      let route = "/flaskwebgui-keep-server-alive"
+      let interval_request = 3 * 1000 //sec
+      function keep_alive_server() {
+        getRequest(url + route)
+          .then(data => console.log(data))
+      }
+      setInterval(keep_alive_server, interval_request)()
+    })
+  </script>
+  <!-- Github buttons -->
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+  <!-- Control Center for Corporate UI Dashboard: parallax effects, scripts for the example pages etc -->
+  <script src="/static/assets/js/corporate-ui-dashboard.min.js?v=1.0.0"></script>
 </body>
 
 </html>

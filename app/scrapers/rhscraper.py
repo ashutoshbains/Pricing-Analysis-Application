@@ -65,7 +65,6 @@ def scrape_data(subcategory):
                                              price,
                                              datetime.now()]
                 url_list.append(product.find_element(By.TAG_NAME, 'a').get_attribute('href'))
-                print(n)
                 n+=1
         except StaleElementReferenceException:
         # If a StaleElementReferenceException is raised, wait for a short time and then retry

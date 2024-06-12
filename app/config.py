@@ -15,11 +15,18 @@ DB_COLUMNS = ['url',
 
 # Product related variables
 CATEGORY_DICT = {
-    'Office': ('Journal'),
+    'Office': ['Journal'],
     'Decor': ('Frames','Statues','Door Mats'),
-    'Garden': ('Planters'),
-    'Accessories': ('Earrings')
+    'Garden': ['Planters'],
+    'Accessories': ['Earrings']
 }
+
+def get_subcategories():
+    subcategories = set()
+    for values_tuple in CATEGORY_DICT.values():
+        for value in values_tuple:
+            subcategories.add(value)
+    return subcategories
 
 def get_category(subcategory):
         for cat, subcat in CATEGORY_DICT.items():
