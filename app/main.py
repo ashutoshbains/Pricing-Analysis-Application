@@ -2,10 +2,10 @@ from app.databasehandler import DbHandler
 
 # ------------------- [IMPORT SCRAPERS HERE]------------------------------
 
-from app.scrapers import rhscraper
 from app.scrapers import ttvscraper
+from app.scrapers import amscraper
 from app.scrapers import ivscraper
-SCRAPERS = [rhscraper,ttvscraper,ivscraper] # Add scrapers to this list
+SCRAPERS = [ttvscraper,ivscraper,amscraper] # Add scrapers to this list
 
 db_handler = DbHandler()
 
