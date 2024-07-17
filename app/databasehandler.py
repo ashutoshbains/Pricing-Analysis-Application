@@ -1,5 +1,6 @@
 import pyodbc
 import numpy as np
+import pandas as pd
 from app import config
 from datetime import datetime
 
@@ -25,22 +26,22 @@ class DbHandler:
         self.conn.commit()
 
     def get_prices(self, store, subcategory):
-        """Return a dictionary of product urls with their prices as value.
+        """Return a dataframe of product urls and their prices.
 
         Args:
             store (str): The store for which to fetch the prices
             subcategory (str): The subcategory to fetch
 
         Returns:
-            dict: Key: Product URL Value: Price
+            DataFrame with columns ['url','Price']
         """
-        product_price_dict = {}
+        df = pd.DataFrame(columns=['url','Price'])
         cursor = self.conn.cursor()
         cursor.execute('SELECT url,price FROM fct_products WHERE store = ? AND subcategory = ?',store,subcategory)
         query_out = cursor.fetchall()
         for row in query_out:
-            product_price_dict[row.url] = row.price
-        return product_price_dict
+            df.loc[len(df)] = [row.url,row.price]
+        return df
     
     def change_price_if_updated(self, scraped_row):
         """Compares the most recent stored prices in fct_price_history with scraped data and add new entry if price has changed.
